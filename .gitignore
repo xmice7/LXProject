@@ -1,6 +1,7 @@
-lab1
-lab1.dSYM/
+main
+main.dSYM/
+my_prog
+.DS_Store
 *.o
 *.out
-.DS_Store
 prices.txt
