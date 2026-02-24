@@ -1,1 +1,6 @@
-.vscode/
+lab1
+lab1.dSYM/
+*.o
+*.out
+.DS_Store
+prices.txt
