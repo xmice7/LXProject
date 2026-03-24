@@ -5,3 +5,4 @@ my_prog
 *.o
 *.out
 prices.txt
+.vscode/
