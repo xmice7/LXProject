@@ -1,7 +1,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "price.h"
 #include <cstdio>
+#include <fstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 using namespace std;
 
@@ -37,51 +40,50 @@ void print(const Price& cina) {
 }
 
 void Total(const char* my_file) {
-    FILE* file = fopen(my_file, "r");
-    if (file == NULL) {
+    ifstream file(my_file);
+    if (!file) {
         cout << "File opening error!" << endl;
         return;
     }
 
     Price total = {0, 0};
-    Price item;
-    int quantity;
-    char name[50];
+    string line;
+    int line_no = 0;
 
-    while (true) {
-    int result = fscanf(file, "%49s %d %hd %d", name, &item.hryvnia, &item.kop, &quantity);
-    if (result == EOF) break;
+    while (getline(file, line)) {
+        ++line_no;
 
-    if (result != 4) {
-        cout << "Input format error!" << endl;
-        fclose(file);
-        return;
-    }
-
-    int extra;
-    while ((extra = fgetc(file)) != EOF) {
-        if (extra == '\n') break;
-        if (extra != ' ' && extra != '\t' && extra != '\r') {
-            cout << "Input format error!" << endl;
+        if (line.find_first_not_of(" \t\r") == string::npos)
             continue;
+
+        istringstream in(line);
+        string name;
+        Price item = {0, 0};
+        int quantity = 0;
+
+        if (!(in >> name >> item.hryvnia >> item.kop >> quantity)) {
+            cout << "Input format error at line " << line_no << "!" << endl;
+            return;
         }
-    }
 
-    if (item.hryvnia < 0 || item.kop < 0 || quantity < 0) {
-        cout << "Negative values aren't allowed!" << endl;
-        fclose(file);
-        return;
-    }
-    if (item.kop > 99) {
-        cout << "Kop error!" << endl;
-        fclose(file);
-        return;
-    }
+        string extra;
+        if (in >> extra) {
+            cout << "Input format error at line " << line_no << "!" << endl;
+            return;
+        }
 
-    multiply(item, quantity);
-    add(total, item);
-}
-    fclose(file);
+        if (item.hryvnia < 0 || item.kop < 0 || quantity < 0) {
+            cout << "Negative values aren't allowed at line " << line_no << "!" << endl;
+            return;
+        }
+
+        if (item.kop > 99) {
+            cout << "Kopiyki error at line " << line_no << " in input.txt!" << endl;
+        }
+
+        multiply(item, quantity);
+        add(total, item);
+    }
     
     cout << "Before rounding: "; print(total); cout << endl;
 
